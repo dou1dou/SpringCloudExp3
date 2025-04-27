@@ -1,0 +1,52 @@
+server:
+  port: 11000
+
+spring:
+  application:
+    name: "consumer-service"
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+    loadbalancer:
+      enabled: true
+eureka:
+  instance:
+    prefer-ip-address: true
+    instance-id: "${spring.cloud.client.ip-address}:${server.port}"
+    lease-expiration-duration-in-seconds: 15
+    lease-renewal-interval-in-seconds: 5
+  client:
+    service-url:
+      defaultZone: "http://localhost:10000/eureka/"
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        wait-duration-in-open-state: 5s
+        sliding-window-type: TIME_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        permitted-number-of-calls-in-half-open-state: 3
+    instances:
+      backendA:
+        base-config: default
+        failure-rate-threshold: 30
+      backendB:
+        base-config: default
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 30
+        slow-call-duration-threshold: 2s
+
+  rate-limiter:
+    configs:
+      default:
+        limit-for-period: 5
+        limit-refresh-period: 2s
+        timeout-duration: 0ms
+
+    instances:
+      rate1:
+        base-config: default
