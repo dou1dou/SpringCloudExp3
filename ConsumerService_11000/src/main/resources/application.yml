@@ -50,3 +50,14 @@ resilience4j:
     instances:
       rate1:
         base-config: default
+
+
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 10
+        max-wait-duration:
+          nanos: 20
+    instances:
+      bulkheadA:
+        base-config: default
